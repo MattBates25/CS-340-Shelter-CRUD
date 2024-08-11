@@ -4,7 +4,7 @@ from bson.objectid import ObjectId
 from pymongo.errors import ConnectionFailure, OperationFailure
 
 
-class AnimalShelter(object): # CRUD operations
+class AnimalShelter(object):  # CRUD operations
     def __init__(self):  # Creates connection to the MongoDB database AAC.
         USER = 'aacuser'
         PASS = 'mtb123'
@@ -12,7 +12,7 @@ class AnimalShelter(object): # CRUD operations
         PORT = 31273
         DB = 'AAC'
         COL = 'animals'
-        try: # Attempts connection
+        try:  # Attempts connection
             self.client = MongoClient('mongodb://%s:%s@%s:%d' % (USER, PASS, HOST, PORT))
             self.database = self.client['%s' % (DB)]
             self.collection = self.database['%s' % (COL)]
@@ -41,3 +41,25 @@ class AnimalShelter(object): # CRUD operations
                 return []  # Returns an empty list if there was an operation failure.
         else:
             raise ValueError("Query parameter is empty.")  # Error if query is None.
+
+    def update(self, query, update_data):  # Queries and then updates a document.
+        if query is not None and update_data is not None:
+            try:
+                result = self.collection.update_many(query, {'$set': update_data})
+                return result.modified_count
+            except OperationFailure as e:
+                print(f"Update operation failed: {e}")
+                return 0
+        else:
+            raise ValueError("The query and/or update_data parameters are empty.")
+
+    def delete(self, query):  # Deletes a document from the collection.
+        if query is not None:
+            try:
+                result = self.collection.delete_many(query)
+                return result.deleted_count
+            except OperationFailure as e:
+                print(f"Delete operation failed: {e}")
+                return 0
+        else:
+            raise ValueError("The query parameter is empty.")
